@@ -1,49 +1,131 @@
 import { useState } from "react";
-import axios from "axios";
+import { useAuth } from "../contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setError("");
+    setLoading(true);
 
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/login", {
-        email,
-        password
-      });
-
-      localStorage.setItem("token", res.data.token);
-
-      alert("Login successful!");
+      await login({ email, password });
+      navigate("/");
     } catch (err) {
-      alert("Login failed");
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div style={{ padding: 40 }}>
-      <h2>Login</h2>
+    <div style={{
+      minHeight: "100vh",
+      background: "linear-gradient(135deg, #000000, #111111)",
+      color: "white",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: "40px",
+      fontFamily: "Arial, sans-serif"
+    }}>
+      <div style={{
+        background: "#1a1a1a",
+        padding: "40px",
+        borderRadius: "10px",
+        width: "100%",
+        maxWidth: "400px",
+        boxShadow: "0 10px 30px rgba(0,0,0,0.3)"
+      }}>
+        <h2 style={{
+          textAlign: "center",
+          marginBottom: "30px",
+          color: "#ff3b3b"
+        }}>
+          Admin Login
+        </h2>
 
-      <form onSubmit={handleLogin}>
-        <input
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <br />
+        {error && (
+          <div style={{
+            background: "#ff3b3b",
+            color: "white",
+            padding: "10px",
+            borderRadius: "5px",
+            marginBottom: "20px",
+            textAlign: "center"
+          }}>
+            {error}
+          </div>
+        )}
 
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <br />
+        <form onSubmit={handleLogin}>
+          <div style={{ marginBottom: "20px" }}>
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "12px",
+                background: "#2a2a2a",
+                border: "1px solid #333",
+                borderRadius: "5px",
+                color: "white",
+                fontSize: "16px"
+              }}
+              required
+            />
+          </div>
 
-        <button type="submit">Login</button>
-      </form>
+          <div style={{ marginBottom: "30px" }}>
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "12px",
+                background: "#2a2a2a",
+                border: "1px solid #333",
+                borderRadius: "5px",
+                color: "white",
+                fontSize: "16px"
+              }}
+              required
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
+              width: "100%",
+              padding: "12px",
+              background: loading ? "#666" : "#ff3b3b",
+              color: "white",
+              border: "none",
+              borderRadius: "5px",
+              fontSize: "16px",
+              fontWeight: "bold",
+              cursor: loading ? "not-allowed" : "pointer",
+              transition: "background 0.3s ease"
+            }}
+          >
+            {loading ? "Logging in..." : "Login"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

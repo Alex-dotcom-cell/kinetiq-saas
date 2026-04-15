@@ -2,8 +2,11 @@ import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import connectDB from "./config/database.js";
 
 import authRoutes from "./routes/authRoutes.js";
+import contentRoutes from "./routes/contentRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
 
 dotenv.config();
 
@@ -35,6 +38,8 @@ app.get("/api/hello", (req, res) => {
 // ROUTES
 // =====================
 app.use("/api/auth", authRoutes);
+app.use("/api/content", contentRoutes);
+app.use("/api/admin", adminRoutes);
 
 // =====================
 // START SERVER
@@ -45,18 +50,20 @@ const startServer = async () => {
             throw new Error("MONGO_URI is missing in .env file");
         }
 
-        await mongoose.connect(process.env.MONGO_URI);
+        await connectDB();
 
-        console.log("MongoDB connected ✅");
+        console.log("✅ Database connected successfully");
 
         app.listen(PORT, () => {
-            console.log(`Backend running on http://localhost:${PORT}`);
+            console.log(`🚀 Server running on http://localhost:${PORT}`);
         });
 
     } catch (err) {
-        console.error("MongoDB connection error ❌", err);
+        console.error("❌ Server startup error:", err);
         process.exit(1);
     }
 };
+
+startServer();
 
 startServer();
